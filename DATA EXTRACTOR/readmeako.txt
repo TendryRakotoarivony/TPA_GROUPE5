@@ -51,4 +51,47 @@ TBLPROPERTIES (
 );
 
 
+### Création des tables externes de Mongo DB sur HIVE
+
+Pour démarrer et accéder à la console HIVE il faut suivre les mêmes instructions que pour la source Oracle NOSQL.
+
+- script de création de la table Catalogue
+
+```bash
+CREATE EXTERNAL TABLE catalogue_h_ext ( 
+id STRING, 
+Marque STRING,
+Nom STRING,
+Puissance DOUBLE,
+Longueur STRING,
+NbPlaces INT,
+NbPortes INT,
+Couleur STRING,
+Occasion STRING,
+Prix DOUBLE )
+STORED BY 'com.mongodb.hadoop.hive.MongoStorageHandler'
+WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "Marque":"Marque", "Nom" : "Nom", "Puissance": "Puissance", "Longueur" : "Longueur", "NbPlaces" : "NbPlaces", "NbPortes" : "NbPortes", "Couleur" : "Couleur", "Occasion" : "Occasion", "Prix" : "Prix"}')
+TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/MBDSTPA.Catalogue');
+```
+
+- script de création de la table Immatriculation
+
+```bash
+CREATE EXTERNAL TABLE immatriculation_h_ext ( 
+id STRING,
+Immatriculation STRING, 
+Marque STRING,
+Nom STRING,
+Puissance DOUBLE,
+Longueur STRING,
+NbPlaces INT,
+NbPortes INT,
+Couleur STRING,
+Occasion STRING,
+Prix DOUBLE )
+STORED BY 'com.mongodb.hadoop.hive.MongoStorageHandler'
+WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "Immatriculation":"Immatriculation", "Marque":"Marque", "Nom" : "Nom", "Puissance": "Puissance", "Longueur" : "Longueur", "NbPlaces" : "NbPlaces", "NbPortes" : "NbPortes", "Couleur" : "Couleur", "Occasion" : "Occasion", "Prix" : "Prix"}')
+TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/MBDSTPA.Immatriculation');
+```
+
 
