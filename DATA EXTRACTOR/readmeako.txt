@@ -1,5 +1,9 @@
 export MYTPHOME=/vagrant/TPA/DATA\ EXTRACTOR/programmesExtraction/
 
+- Démarrer le serveur Oracle NOSQL (KV Store) avec la commande 
+```bash
+nohup java -Xmx64m -Xms64m -jar $KVHOME/lib/kvstore.jar kvlite -secure-config disable -root $KVROOT &
+
 # Compilation
 javac -g -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." "$MYTPHOME/Marketing.java"
 
