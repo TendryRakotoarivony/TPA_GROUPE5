@@ -1,4 +1,5 @@
 export MYTPHOME=/vagrant/TPA/DATA\ EXTRACTOR/programmesExtraction/
+export DATAHOME=/vagrant/TPA/DATA\ EXTRACTOR/dataSources
 
 - Démarrer le serveur Oracle NOSQL (KV Store) avec la commande 
 ```bash
@@ -14,7 +15,7 @@ java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." Marketing
 -- client
 javac -g -cp "$KVHOME/lib/kvclient.jar:." "$MYTPHOME/Clients.java"
 java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME" Clients
-
+    
 -- creation table externe hive
 start-dfs.sh
 start-yarn.sh
@@ -57,6 +58,42 @@ TBLPROPERTIES (
 "oracle.kv.tableName" = "clients"
 );
 
+-- mandefa anle izy mongo 
+On lance MongoDB : 
+
+```bash
+sudo systemctl start mongod
+```
+
+On se connecte ensuite au MongoDB Client
+
+```bash
+mongo
+```
+
+On execute la serie des commandes suivante :
+
+```bash
+// Créer la BDD TPA
+use TPA
+// Créer les deux collections "Immatriculation" "Catalogue" :
+db.createCollection("Immatriculation")
+db.createCollection("Catalogue")
+// Verifier les collections
+show collections
+//On quitte le mongo shell
+quit()
+
+
+mongoimport -d TPA -c Immatriculation --type=csv --file="$DATAHOME/Immatriculations.csv" --headerline
+mongoimport -d TPA -c Catalogue --type=csv --file="$DATAHOME/Catalogue.csv"  --headerline
+
+
+mongo
+use TPA
+db.Catalogue.find({})
+db.Immatriculation.find({})
+
 
 ### Création des tables externes de Mongo DB sur HIVE
 
@@ -98,7 +135,9 @@ Occasion STRING,
 Prix DOUBLE )
 STORED BY 'com.mongodb.hadoop.hive.MongoStorageHandler'
 WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "Immatriculation":"Immatriculation", "Marque":"Marque", "Nom" : "Nom", "Puissance": "Puissance", "Longueur" : "Longueur", "NbPlaces" : "NbPlaces", "NbPortes" : "NbPortes", "Couleur" : "Couleur", "Occasion" : "Occasion", "Prix" : "Prix"}')
-TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/MBDSTPA.Immatriculation');
+TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/TPA.Immatriculation');
 ```
 
-
+hadoop fs -mkdir input
+hadoop fs -put /vagrant/CO2.csv input/CO2.csv
+spark-submit  "$MYTPHOME/HDFS/src/co2Reader.py"
