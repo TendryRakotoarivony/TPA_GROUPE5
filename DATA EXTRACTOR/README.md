@@ -224,7 +224,7 @@ Mettre le fichier dans HDFS via la commande :
 ```bash
 hadoop fs -rmr input/*
 hadoop fs -mkdir input
-hadoop fs -put /vagrant/CO2.csv input/CO2.csv
+hadoop fs -put /vagrant/TPA/CO2.csv input/CO2.csv
 ```
 
 Pour être sûr qu'il n'existe pas de output déjà créer :
