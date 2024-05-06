@@ -1,8 +1,11 @@
-KVHOME="/vagrant/kvstore/lib"
 export MYTPHOME=/vagrant/TPA/DATA\ EXTRACTOR/programmesExtraction/
 
-javac -g -cp "$KVHOME/lib/kvclient.jar:." "$MYTPHOME/Marketing.java"
-java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME" Marketing
+# Compilation
+javac -g -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." "$MYTPHOME/Marketing.java"
+
+# Exécution
+java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." Marketing
+
 
 -- client
 javac -g -cp "$KVHOME/lib/kvclient.jar:." "$MYTPHOME/Clients.java"
