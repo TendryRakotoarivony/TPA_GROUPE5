@@ -9,19 +9,27 @@ Pour notre projet nous avons décidé de placer les données clients et marketin
 ```bash 
 vagrant ssh
 ```	
+- Définir les variables d'environement
+```bash 
+export MYTPHOME=/vagrant/TPA/DATA\ EXTRACTOR/programmesExtraction/
+export DATAHOME=/vagrant/TPA/DATA\ EXTRACTOR/dataSources
+```	
+
 - Démarrer le serveur Oracle NOSQL (KV Store) avec la commande 
 ```bash
 nohup java -Xmx64m -Xms64m -jar $KVHOME/lib/kvstore.jar kvlite -secure-config disable -root $KVROOT &
 ```
 - réaliser l'import de Marketing
 ```bash
-javac -g -cp $KVHOME/lib/kvclient.jar:. Marketing.java
-java -cp $KVHOME/lib/kvclient.jar:. Marketing
+javac -g -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." "$MYTPHOME/Marketing.java"
+java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME:." Marketing
+
 ```
 - réaliser l'import de Clients
 ```bash
-javac -g -cp $KVHOME/lib/kvclient.jar:. Clients.java
-java -cp $KVHOME/lib/kvclient.jar:. Clients
+javac -g -cp "$KVHOME/lib/kvclient.jar:." "$MYTPHOME/Clients.java"
+java -cp "$KVHOME/lib/kvclient.jar:$MYTPHOME" Clients
+    
 ```
 Nous allons maintenant créer les tables externes sur HIVE pour pouvoir accéder aux données.
 
@@ -130,13 +138,15 @@ cd /vagrant
 Ensuite, on lance la commande pour importer les données pour Catalogue :
 
 ```bash
-mongoimport -d TPA -c Catalogue --type=csv --file={url}/{to}/{file}/Catalogue.csv  --headerline
+mongoimport -d TPA -c Catalogue --type=csv --file="$DATAHOME/Catalogue.csv"  --headerline
+
 ```
 
 De meme pour Immatriculation : 
 
 ```bash
-mongoimport -d TPA -c Immatriculation --type=csv --file={url}/{to}/{file}/Immatriculation.csv  --headerline
+mongoimport -d TPA -c Immatriculation --type=csv --file="$DATAHOME/Immatriculations.csv" --headerline
+
 ```
 
 On peut verifier que les donnees on ete bien importees :
@@ -167,7 +177,7 @@ Couleur STRING,
 Occasion STRING,
 Prix DOUBLE )
 STORED BY 'com.mongodb.hadoop.hive.MongoStorageHandler'
-WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "Marque":"Marque", "Nom" : "Nom", "Puissance": "Puissance", "Longueur" : "Longueur", "NbPlaces" : "NbPlaces", "NbPortes" : "NbPortes", "Couleur" : "Couleur", "Occasion" : "Occasion", "Prix" : "Prix"}')
+WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "marque":"marque", "nom" : "nom", "puissance": "puissance", "longueur" : "longueur", "nbPlaces" : "nbPlaces", "nbPortes" : "nbPortes", "couleur" : "couleur", "occasion" : "occasion", "prix" : "prix"}')
 TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/TPA.Catalogue');
 ```
 
@@ -187,7 +197,7 @@ Couleur STRING,
 Occasion STRING,
 Prix DOUBLE )
 STORED BY 'com.mongodb.hadoop.hive.MongoStorageHandler'
-WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "Immatriculation":"Immatriculation", "Marque":"Marque", "Nom" : "Nom", "Puissance": "Puissance", "Longueur" : "Longueur", "NbPlaces" : "NbPlaces", "NbPortes" : "NbPortes", "Couleur" : "Couleur", "Occasion" : "Occasion", "Prix" : "Prix"}')
+WITH SERDEPROPERTIES('mongo.columns.mapping'='{"id":"_id", "immatriculation":"immatriculation", "marque":"marque", "nom" : "nom", "puissance": "puissance", "longueur" : "longueur", "nbPlaces" : "nbPlaces", "nbPortes" : "nbPortes", "couleur" : "couleur", "occasion" : "occasion", "prix" : "prix"}')
 TBLPROPERTIES('mongo.uri'='mongodb://localhost:27017/TPA.Immatriculation');
 ```
 
@@ -212,7 +222,9 @@ nohup hiveserver2 > /dev/null &
 Mettre le fichier dans HDFS via la commande :
 
 ```bash
-hadoop fs -put CO2.csv input/CO2.csv
+hadoop fs -rmr input/*
+hadoop fs -mkdir input
+hadoop fs -put /vagrant/CO2.csv input/CO2.csv
 ```
 
 Pour être sûr qu'il n'existe pas de output déjà créer :
@@ -223,7 +235,7 @@ hadoop fs -rmr output/*
 Maintenant que le fichier est dans HDFS, vous pouvez lancer le script python qui va modifier le csv pour le nettoyer :
 
 ```bash
-spark-submit co2Reader.py
+spark-submit  "$MYTPHOME/HDFS/src/co2Reader.py"
 ```
 
 
